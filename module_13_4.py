@@ -2,11 +2,19 @@ from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 import asyncio
 
 api = ""
-bot = Bot(token = api)
+bot = Bot(token=api)
 dp = Dispatcher(bot, storage=MemoryStorage())
+
+kb = ReplyKeyboardMarkup()
+button = KeyboardButton(text='Рассчитать')
+button2 = KeyboardButton(text='Информация')
+kb.add(button)
+kb.add(button2)
+#kb.row kb.insert
 
 
 class UserState(StatesGroup):
@@ -16,10 +24,14 @@ class UserState(StatesGroup):
 
 @dp.message_handler(commands=['start'])
 async def start_message(message):
-    await message.answer('Введите "Calories"')
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
+    buttons = ['Рассчитать', 'Информация']
+    keyboard.add(*buttons)
+    await message.answer("Привет! я бот помогающий твоему здоровью.", reply_markup=keyboard)
+
 
 # Хэндлер начального вызова
-@dp.message_handler(text=["Calories"])
+@dp.message_handler(text=["Рассчитать"])
 async def set_age(message: types.Message):
     await message.reply("Введите свой возраст:")
     await UserState.age.set()
@@ -51,7 +63,7 @@ async def send_calories(message: types.Message, state: FSMContext):
 
     # Упрощенная формула Миффлина - Сан Жеора для мужчин
     bmr = 10 * weight + 6.25 * growth - 5 * age + 5
-    await message.answer(f'Ваш базальный метаболизм: {bmr} калорий в день.')
+    await message.answer(f'Ваша норма калорий: {bmr}')
 
     await state.finish()
 
